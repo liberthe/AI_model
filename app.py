@@ -46,11 +46,22 @@ input_seq = st.text_input("Hoặc nhập chuỗi hành vi:", sample_seq)
 
 if st.button("📈 Dự đoán"):
     try:
-        # Nếu nhập chuỗi dạng số (từ file), chuyển về tên hành vi
-        if all(x.strip().isdigit() or x.strip() == '-' for x in input_seq.replace('.', ',').split(',')):
-            actions = [id2action[int(i)] for i in input_seq.replace('.', ',').split(',') if i.strip() not in ['', '-1']]
+        # Tự động nhận biết dấu phân cách (dấu phẩy hoặc dấu chấm)
+        if "." in input_seq and not "," in input_seq:
+            sep = "."
         else:
-            actions = [a.strip() for a in input_seq.split(",") if a.strip() in action2id]
+            sep = ","
+        # Nếu nhập chuỗi dạng số (từ file), chuyển về tên hành vi
+        if all(x.strip().lstrip('-').isdigit() for x in input_seq.replace('.', ',').split(',')):
+            actions = []
+            for i in input_seq.replace('.', ',').split(','):
+                i = i.strip()
+                if i not in ['', '-1']:
+                    idx = int(i)
+                    if idx in id2action:
+                        actions.append(id2action[idx])
+        else:
+            actions = [a.strip() for a in input_seq.split(sep) if a.strip() in action2id]
 
         st.write("Actions:", actions)  # Debug xem actions đã đúng chưa
 
@@ -70,3 +81,4 @@ if st.button("📈 Dự đoán"):
     except Exception as e:
         st.error(f"Lỗi: {e}")
         
+
